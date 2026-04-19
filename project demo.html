@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noor Boutique</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #fff5f7;
+  animation: fadeIn 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+header {
+  text-align: center;
+  padding: 20px;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tab {
+  padding: 8px 16px;
+  border: 1px solid #e8a0b4;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+
+.tab.active {
+  background: #c96090;
+  color: white;
+}
+
+.tab:active {
+  transform: scale(0.94);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+  padding: 15px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+  animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
+
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+@keyframes cardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card:active {
+  transform: scale(0.97);
+}
+
+.card img {
+  width: 100%;
+  transition: transform 0.5s cubic-bezier(0.22,1,0.36,1);
+}
+
+.card:hover img {
+  transform: scale(1.05);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: flex-end;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal {
+  background: white;
+  width: 100%;
+  border-radius: 20px 20px 0 0;
+  padding: 15px;
+
+  transform: translateY(100%);
+  transition: transform 0.45s cubic-bezier(0.32,0.72,0,1);
+}
+
+.overlay.open .modal {
+  transform: translateY(0);
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background: #25d366;
+  color: white;
+  border: none;
+  border-radius: 8px;
+
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+button:active {
+  transform: scale(0.96);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>Noor Boutique</h2>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('hijab', this)">Hijabs</div>
+  <div class="tab" onclick="switchTab('dress', this)">Dresses</div>
+</div>
+
+<div id="grid" class="grid"></div>
+
+<div id="overlay" class="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <h3 id="name"></h3>
+    <p id="price"></p>
+
+    <select id="size"></select>
+    <input type="number" id="qty" value="1">
+
+    <button onclick="order()">Order on WhatsApp</button>
+  </div>
+</div>
+
+<script>
+const phone = "91XXXXXXXXXX";
+
+const products = [
+  {name:"Pink Hijab", price:499, cat:"hijab"},
+  {name:"Beige Hijab", price:399, cat:"hijab"},
+  {name:"Floral Dress", price:1499, cat:"dress"},
+  {name:"Pink Abaya", price:1999, cat:"dress"},
+];
+
+let current = null;
+
+function render(cat) {
+  document.getElementById("grid").innerHTML = products
+    .filter(p => p.cat === cat)
+    .map((p, i) => `
+      <div class="card" style="animation-delay:${i * 0.06}s" onclick="openModal(${i})">
+        <img src="https://via.placeholder.com/200">
+        <div style="padding:8px">
+          <p>${p.name}</p>
+          <p>₹${p.price}</p>
+        </div>
+      </div>
+    `).join("");
+}
+
+function switchTab(cat, el) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  el.classList.add("active");
+  render(cat);
+}
+
+function openModal(i) {
+  current = products[i];
+  document.getElementById("overlay").classList.add("open");
+
+  document.getElementById("name").innerText = current.name;
+  document.getElementById("price").innerText = "₹" + current.price;
+
+  document.getElementById("size").innerHTML =
+    current.cat === "dress"
+    ? "<option>S</option><option>M</option><option>L</option>"
+    : "<option>One Size</option>";
+}
+
+function closeModal(e) {
+  if (e.target.id === "overlay") {
+    document.getElementById("overlay").classList.remove("open");
+  }
+}
+
+function order() {
+  let msg = `Order: ${current.name} Qty:${document.getElementById("qty").value}`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+}
+
+render("hijab");
+</script>
+
+</body>
+</html>
